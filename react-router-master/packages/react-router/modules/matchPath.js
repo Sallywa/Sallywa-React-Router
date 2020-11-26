@@ -4,6 +4,7 @@ const cache = {};
 const cacheLimit = 10000;
 let cacheCount = 0;
 
+//根据path生成正则
 function compilePath(path, options) {
   const cacheKey = `${options.end}${options.strict}${options.sensitive}`;
   const pathCache = cache[cacheKey] || (cache[cacheKey] = {});
@@ -26,6 +27,10 @@ function compilePath(path, options) {
  */
 //pathname是url上的路由
 function matchPath(pathname, options = {}) {
+  // Array.isArray(options) 对应的下列这种path为数组的情况👇
+  // <Route path={["/users/:id", "/profile/:id"]}>
+  //   <User />
+  // </Route>
   if (typeof options === "string" || Array.isArray(options)) {
     options = { path: options };
   }

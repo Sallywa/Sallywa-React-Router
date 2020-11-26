@@ -28,6 +28,7 @@ class Switch extends React.Component {
             if (match == null && React.isValidElement(child)) {
               element = child;
 
+              //Route有path字段，Redirect有from字段
               const path = child.props.path || child.props.from;
 
               match = path
@@ -35,9 +36,15 @@ class Switch extends React.Component {
                 : context.match;
             }
           });
-
+          // React.cloneElement(
+          //   element,
+          //   [props],
+          //   [...children]
+          // )
+          // 以 element 元素为样板克隆并返回新的 React 元素。返回元素的 props 是将新的 props 与原始元素的 props 浅层合并后的结果。新的子元素将取代现有的子元素，而来自原始元素的 key 和 ref 将被保留。
           return match
-            ? React.cloneElement(element, { location, computedMatch: match })
+            ? //switch 把计算出的match作为props传递给子组件
+              React.cloneElement(element, { location, computedMatch: match })
             : null;
         }}
       </RouterContext.Consumer>

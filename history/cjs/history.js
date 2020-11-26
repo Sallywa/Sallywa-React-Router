@@ -106,8 +106,8 @@ function createPath(location) {
 
 //创建一个所有关于path的location信息然后返回
 // location = {
-//   pathname: "/",
-//   search: "?white=1605758089954",
+//   pathname: "/home",
+//   search: "?chid=12345&entry_from=501101&entryFrom=501101&productId=foreseajtywfree01&productID=foreseajtywfree01&white=1605782632829,
 //   hash: "",
 //   state: undefined
 // };
@@ -196,7 +196,13 @@ function createTransitionManager() {
       if (prompt === nextPrompt) prompt = null;
     };
   }
-
+  /**
+   * 实现提示
+   * @param location：地址
+   * @param action：行为
+   * @param getUserConfirmation 设置弹框
+   * @param callback 回调函数：block函数的返回值作为参数
+   */
   function confirmTransitionTo(
     location,
     action,
@@ -373,7 +379,6 @@ function createBrowserHistory(props) {
     ? stripTrailingSlash(addLeadingSlash(props.basename))
     : "";
 
-  //
   function getDOMLocation(historyState) {
     var _ref = historyState || {},
       key = _ref.key,
@@ -405,9 +410,9 @@ function createBrowserHistory(props) {
 
   var transitionManager = createTransitionManager();
 
+  //最终是通过setState 来触发路由监听者，其中notifyListeners 会调用所有的listen 的回调函数
   function setState(nextState) {
     _extends(history, nextState);
-
     history.length = globalHistory.length;
     transitionManager.notifyListeners(history.location, history.action);
   }
@@ -691,7 +696,7 @@ function getHashPath() {
   var hashIndex = href.indexOf("#");
   return hashIndex === -1 ? "" : href.substring(hashIndex + 1);
 }
-
+//重设url的hash
 function pushHashPath(path) {
   window.location.hash = path;
 }
@@ -728,6 +733,12 @@ function createHashHistory(props) {
     decodePath = _HashPathCoders$hashT.decodePath;
 
   //获取location信息
+  // location = {
+  //   pathname: "/home",
+  //   search: "?chid=12345&entry_from=501101&entryFrom=501101&productId=foreseajtywfree01&productID=foreseajtywfree01&white=1605782632829,
+  //   hash: "",
+  //   state: undefined
+  // };
   function getDOMLocation() {
     var path = decodePath(getHashPath());
     warning(
@@ -739,6 +750,7 @@ function createHashHistory(props) {
         basename +
         '".'
     );
+    //获取去除basename的path
     if (basename) path = stripBasename(path, basename);
     return createLocation(path);
   }
@@ -747,7 +759,6 @@ function createHashHistory(props) {
 
   function setState(nextState) {
     _extends(history, nextState);
-
     history.length = globalHistory.length;
     transitionManager.notifyListeners(history.location, history.action);
   }
@@ -770,11 +781,20 @@ function createHashHistory(props) {
       // Ensure we always have a properly-encoded hash.
       replaceHashPath(encodedPath);
     } else {
+      // location = {
+      //   pathname: xxx,
+      //   search: xxx,
+      //   hash: xxx,
+      //   state: xxx
+      // };
       var location = getDOMLocation();
       var prevLocation = history.location;
-      if (!forceNextPop && locationsAreEqual$$1(prevLocation, location)) return; // A hashchange doesn't always == location change.
+      // A hashchange doesn't always == location change.
+      // 翻译：hashchange不代表location变化了，需要做判断
+      if (!forceNextPop && locationsAreEqual$$1(prevLocation, location)) return;
 
-      if (ignorePath === createPath(location)) return; // Ignore this change; we already setState in push/replace.
+      // Ignore this change; we already setState in push/replace.
+      if (ignorePath === createPath(location)) return;
 
       ignorePath = null;
       handlePop(location);
@@ -937,7 +957,7 @@ function createHashHistory(props) {
   //注册hash变化监听函数
   function checkDOMListeners(delta) {
     listenerCount += delta;
-    //这样写的目的应该是为了防止多次监听 只运行一个且只有一个的监听函数
+    //这样写的目的是为了防止重复监听 只运行一个且只有一个的hashchange事件监听函数
     if (listenerCount === 1 && delta === 1) {
       window.addEventListener(HashChangeEvent$1, handleHashChange);
       //只有listenerCount为0的时候才会取消监听
@@ -1022,7 +1042,6 @@ function createMemoryHistory(props) {
 
   function setState(nextState) {
     _extends(history, nextState);
-
     history.length = history.entries.length;
     transitionManager.notifyListeners(history.location, history.action);
   }
